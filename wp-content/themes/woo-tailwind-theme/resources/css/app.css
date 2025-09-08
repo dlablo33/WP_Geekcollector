@@ -1,0 +1,14 @@
+@import "tailwindcss" theme(static);
+@source "../views/";
+@source "../../app/";
+a {
+    text-decoration: none;
+}
+
+/* app.css */
+.logo-custom {
+  max-width: 180px !important; /* límite máximo */
+  width: 100% !important;      /* ocupa hasta ese ancho */
+  height: auto !important;     /* mantiene proporción */
+  display: block;
+}

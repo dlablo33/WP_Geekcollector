@@ -1,0 +1,81 @@
+# WordPress core
+/wp-admin/
+/wp-includes/
+/license.txt
+/readme.html
+/wp-activate.php
+/wp-blog-header.php
+/wp-comments-post.php
+/wp-config-sample.php
+/wp-cron.php
+/wp-links-opml.php
+/wp-load.php
+/wp-login.php
+/wp-mail.php
+/wp-settings.php
+/wp-signup.php
+/wp-trackback.php
+/xmlrpc.php
+/index.php
+/index.nginx-debian.html
+
+# Uploads
+/wp-content/uploads/
+/wp-content/upgrade/
+/wp-content/backup-db/
+/wp-content/cache/
+/wp-content/backups/
+
+# Themes and plugins (except your custom theme)
+/wp-content/themes/*/
+!/wp-content/themes/woo-tailwind-theme/
+
+# Plugins (general exclusion, keep what you need)
+/wp-content/plugins/*/
+# !/wp-content/plugins/your-custom-plugin/ # Descomenta si tienes plugins personalizados
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+.wp-env.json
+wp-config.php
+
+# Composer
+/vendor/
+/composer.lock
+
+# Node.js
+/node_modules/
+/package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+*.log
+logs/
+
+# Database
+*.sql
+*.sqlite
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
