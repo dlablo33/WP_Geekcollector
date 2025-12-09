@@ -15,22 +15,24 @@
  * @version     2.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+    exit();
 }
 ?>
 </ul>
-        <nav class="woocommerce-pagination mt-8">
-            @php
-                global $wp_query;
-                echo paginate_links([
-                    'total'   => isset($wp_query) ? $wp_query->max_num_pages : 1,
-                    'current' => max( 1, get_query_var('paged', 1) ),
-                    'prev_text' => '&laquo;',
-                    'next_text' => '&raquo;',
-                    'type'    => 'list',
-                ]);
-            @endphp
-        </nav>
-    </section>
 </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Seleccionamos todos los <li> dentro del grid de productos
+        const productItems = document.querySelectorAll(".products li");
+
+        productItems.forEach(item => {
+            // Verificamos si el card está vacío (sin contenido visible)
+            if (item.textContent.trim() === "" && item.querySelector("img") === null) {
+                item.remove(); // Eliminamos el <li> fantasma
+            }
+        });
+    });
+</script>
+

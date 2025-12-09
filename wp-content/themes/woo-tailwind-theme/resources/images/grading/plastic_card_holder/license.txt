@@ -1,0 +1,8 @@
+Model Information:
+* title:	Plastic Card Holder
+* source:	https://sketchfab.com/3d-models/plastic-card-holder-643891b735ec4f449a297af636b5ffbd
+* author:	Myles Griffen (https://sketchfab.com/mylesgriffen)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works

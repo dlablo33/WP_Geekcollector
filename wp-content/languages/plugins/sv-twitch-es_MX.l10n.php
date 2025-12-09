@@ -1,0 +1,2 @@
+<?php
+return ['x-generator'=>'GlotPress/4.0.1','translation-revision-date'=>'2021-01-05 22:21:02+0000','plural-forms'=>'nplurals=2; plural=n != 1;','project-id-version'=>'Plugins - SV Block for Twitch - Stable (latest release)','language'=>'es_MX','messages'=>['https://straightvisions.com'=>'https://straightvisions.com','straightvisions GmbH'=>'straightvisions GmbH','Display Twitch streams with this Gutenberg block.'=>'Muestra transmisiones de Twitch con este bloque de Gutenberg.','https://straightvisions.com/'=>'https://straightvisions.com/']];

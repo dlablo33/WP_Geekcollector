@@ -58,7 +58,7 @@
                 @php wc_print_notices() @endphp
 
                 <div
-                    class="anime-content transform rounded-xl border-l-4 border-orange-500 bg-gray-900/80 p-6 text-gray-200 shadow-lg transition duration-500 hover:scale-[1.01] hover:shadow-yellow-500/30">
+                    class="anime-content transform rounded-xl border-l-4 border-orange-500 bg-gray-900/80 p-6 text-gray-200 shadow-lg transition duration-500 hover:shadow-yellow-500/30">
                     <div class="mb-4 flex items-center">
                         <svg class="mr-3 h-8 w-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

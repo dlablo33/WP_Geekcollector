@@ -1,5 +1,10 @@
 @php
+    /**
+     * Plantilla personalizada de pedidos de cuenta de usuario
+     * Compatible con WooCommerce + Blade (Acorn/Sage)
+     */
 
+    // Columnas de la tabla
     $my_orders_columns = apply_filters('woocommerce_my_account_my_orders_columns', [
         'order-number' => esc_html__('Order', 'woocommerce'),
         'order-date' => esc_html__('Date', 'woocommerce'),
@@ -8,6 +13,7 @@
         'order-actions' => '&nbsp;',
     ]);
 
+    // Consulta de pedidos del cliente actual
     $customer_orders = get_posts(
         apply_filters('woocommerce_my_account_my_orders_query', [
             'numberposts' => $order_count,
@@ -18,7 +24,10 @@
         ]),
     );
 
+    // 🔹 Definir página actual para evitar error "Undefined variable $current_page"
+    $current_page = max(1, get_query_var('paged', 1));
 @endphp
+
 
 @if ($customer_orders)
     <h2>{{ apply_filters('woocommerce_my_account_my_orders_title', esc_html__('Recent orders', 'woocommerce')) }}</h2> 	
@@ -43,32 +52,34 @@
                 @endphp
                 <tr class="order">
                     @foreach ($my_orders_columns as $column_id => $column_name)
-                        <td class="{{ esc_attr($column_id) }}" data-title=" {{ esc_attr($column_name) }} ">
+                        <td class="{{ esc_attr($column_id) }}" data-title="{{ esc_attr($column_name) }}">
                             @if (has_action('woocommerce_my_account_my_orders_column_' . $column_id))
                                 @php
                                     do_action('woocommerce_my_account_my_orders_column_' . $column_id, $order);
                                 @endphp
-                            @elseif('order-number' === $column_id)
+                            @elseif ('order-number' === $column_id)
                                 <a href="{{ esc_url($order->get_view_order_url()) }}">
                                     {{ _x('#', 'hash before order number', 'woocommerce') . $order->get_order_number() }}
                                 </a>
-                            @elseif('order-date' === $column_id)
-                                <time
-                                    datetime="{{ esc_attr($order->get_date_created()->date('c')) }}">{{ esc_html(wc_format_datetime($order->get_date_created())) }}</time>
-                            @elseif('order-status' === $column_id)
+                            @elseif ('order-date' === $column_id)
+                                <time datetime="{{ esc_attr($order->get_date_created()->date('c')) }}">
+                                    {{ esc_html(wc_format_datetime($order->get_date_created())) }}
+                                </time>
+                            @elseif ('order-status' === $column_id)
                                 {{ esc_html(wc_get_order_status_name($order->get_status())) }}
-                            @elseif('order-total' === $column_id)
+                            @elseif ('order-total' === $column_id)
                                 @php
-                                    /* translators: 1: formatted order total 2: total order items */
-                                    printf(_n('%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce'), $order->get_formatted_order_total(), $item_count);
+                                    printf(
+                                        _n('%1$s for %2$s item', '%1$s for %2$s items', $item_count, 'woocommerce'),
+                                        $order->get_formatted_order_total(),
+                                        $item_count
+                                    );
                                 @endphp
-                            @elseif('order-actions' === $column_id)
+                            @elseif ('order-actions' === $column_id)
                                 @php
                                     $actions = wc_get_account_orders_actions($order);
-
                                     if (!empty($actions)) {
                                         foreach ($actions as $key => $action) {
-                                            // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
                                             echo '<a href="' .
                                                 esc_url($action['url']) .
                                                 '" class="button ' .
@@ -79,11 +90,34 @@
                                         }
                                     }
                                 @endphp
-                            @endif                       
+                            @endif
                         </td>
                     @endforeach
                 </tr>
             @endforeach
         </tbody>
     </table>
+
+    {{-- 🔹 Paginación --}}
+    @if (1 < $customer_orders->max_num_pages)
+        <div class="woocommerce-pagination woocommerce-Pagination">
+            {{-- Anterior --}}
+            @if (1 !== $current_page)
+                <a class="woocommerce-button woocommerce-button--previous"
+                    href="{{ esc_url(wc_get_endpoint_url('orders', $current_page - 1)) }}">
+                    @php esc_html_e('Previous', 'woocommerce'); @endphp
+                </a>
+            @endif
+
+            {{-- Siguiente --}}
+            @if (intval($customer_orders->max_num_pages) !== $current_page)
+                <a class="woocommerce-button woocommerce-button--next"
+                    href="{{ esc_url(wc_get_endpoint_url('orders', $current_page + 1)) }}">
+                    @php esc_html_e('Next', 'woocommerce'); @endphp
+                </a>
+            @endif
+        </div>
+    @endif
+@else
+    <p>{{ esc_html__('No orders have been made yet.', 'woocommerce') }}</p>
 @endif

@@ -35,4 +35,5 @@ export default defineConfig({
       '@images': '/resources/images',
     },
   },
+  assetsInclude: ['**/*.glb', '**/*.gltf', '**/*.bin'],
 })

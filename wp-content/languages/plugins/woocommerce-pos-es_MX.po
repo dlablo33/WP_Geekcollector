@@ -1,0 +1,190 @@
+# Translation of Plugins - WooCommerce POS &#8211; Point of Sale - Stable (latest release) in Spanish (Mexico)
+# This file is distributed under the same license as the Plugins - WooCommerce POS &#8211; Point of Sale - Stable (latest release) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2021-01-09 15:24:50+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: GlotPress/4.0.1\n"
+"Language: es_MX\n"
+"Project-Id-Version: Plugins - WooCommerce POS &#8211; Point of Sale - Stable (latest release)\n"
+
+#. Author of the plugin
+#: woocommerce-pos.php
+msgid "kilbot"
+msgstr "kilbot"
+
+#. Description of the plugin
+#: woocommerce-pos.php
+msgid "A simple front-end for taking WooCommerce orders at the Point of Sale. Requires <a href=\"http://wordpress.org/plugins/woocommerce/\">WooCommerce</a>."
+msgstr "Una sencilla interfaz para llevar los pedidos de WooCommerce al punto de venta. Necesita <a href=\"http://es-mx.wordpress.org/plugins/woocommerce/\">WooCommerce</a>."
+
+#. Plugin URI of the plugin
+#: woocommerce-pos.php
+msgid "https://wordpress.org/plugins/woocommerce-pos/"
+msgstr "https://es-mx.wordpress.org/plugins/woocommerce-pos/"
+
+#. Plugin Name of the plugin
+#: woocommerce-pos.php
+msgid "WooCommerce POS"
+msgstr "WooCommerce POS"
+
+#: templates/pos.php:14
+msgid "Point of Sale"
+msgstr "Punto de venta"
+
+#: includes/Activator.php:216 includes/Templates/Payment.php:402
+#: templates/receipt.php:181
+msgid "Cashier"
+msgstr "Cajero"
+
+#: templates/receipt.php:226
+msgid "Subtotal"
+msgstr "Subtotal"
+
+#: templates/receipt.php:198 templates/receipt.php:263
+msgid "Total"
+msgstr "Total"
+
+#: templates/receipt.php:195
+msgid "Product"
+msgstr "Producto"
+
+#: templates/receipt.php:197
+msgid "Price"
+msgstr "Precio"
+
+#: templates/receipt.php:196
+msgid "Quantity"
+msgstr "Cantidad"
+
+#: includes/Templates/Payment.php:489
+msgid "Remove"
+msgstr "Quitar"
+
+#. translators: wordpress
+#: includes/Admin/Products/templates/post-metabox-visibility-select.php:43
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. translators: wordpress
+#: includes/Admin/Products/templates/post-metabox-visibility-select.php:36
+msgid "OK"
+msgstr "Aceptar"
+
+#. translators: wordpress
+#: includes/Admin/Products/templates/post-metabox-visibility-select.php:17
+msgid "Edit"
+msgstr "Editar"
+
+#: includes/Admin/Products/templates/post-metabox-visibility-select.php:11
+#: includes/Admin/Products/templates/quick-edit-visibility-select.php:14
+#: includes/Admin/Products/templates/variation-metabox-visibility-select.php:13
+msgid "POS visibility"
+msgstr "Visibilidad del TPV"
+
+#: includes/Admin/Products/List_Products.php:41
+#: includes/Admin/Products/List_Products.php:124
+#: includes/Admin/Products/Single_Product.php:46
+msgid "Online Only"
+msgstr "Solo online"
+
+#: includes/Admin/Products/List_Products.php:40
+#: includes/Admin/Products/List_Products.php:123
+#: includes/Admin/Products/Single_Product.php:45
+msgid "POS Only"
+msgstr "Solo TPV"
+
+#: includes/Admin/Products/List_Products.php:39
+#: includes/Admin/Products/Single_Product.php:44
+msgid "POS & Online"
+msgstr "TPV y online"
+
+#: includes/Gateways/Cash.php:82 includes/Gateways/Cash.php:85
+#: includes/Gateways/Cash.php:197 templates/receipt.php:273
+msgid "Amount Tendered"
+msgstr "Cantidad entregada"
+
+#: includes/Gateways/Cash.php:27
+msgid "Cash"
+msgstr "Efectivo"
+
+#: includes/Gateways/Card.php:60 includes/Gateways/Card.php:63
+#: includes/Gateways/Card.php:99 includes/Gateways/Card.php:137
+msgid "Cashback"
+msgstr "Cambio"
+
+#: includes/Gateways/Card.php:23
+msgid "Card"
+msgstr "Tarjeta"
+
+#. translators: wordpress
+#: includes/Templates/Frontend.php:41
+msgid "You do not have sufficient permissions to access this page."
+msgstr "No tienes suficientes permisos para acceder a esta página."
+
+#: includes/Activator.php:154
+msgid "Enable permalinks"
+msgstr "Activar enlaces permanentes"
+
+#: includes/Activator.php:153
+msgid "<strong>WooCommerce REST API</strong> requires <em>pretty</em> permalinks to work correctly"
+msgstr "La <strong>API REST de WooCommerce</strong> necesita enlaces permanentes <em>bonitos</em> para funcionar correctamente"
+
+#: includes/Templates/Payment.php:429 includes/Templates/Payment.php:442
+#: templates/receipt.php:297 templates/receipt.php:313
+msgid "N/A"
+msgstr "N/D"
+
+#: includes/Templates/Payment.php:420
+msgid "Guest"
+msgstr "Invitado"
+
+#: templates/receipt.php:243
+msgid "Discount"
+msgstr "Descuento"
+
+#: includes/Gateways/Cash.php:199
+msgctxt "Money returned from cash sale"
+msgid "Change"
+msgstr "Cambio"
+
+#: templates/receipt.php:231
+msgid "Shipping"
+msgstr "Envío"
+
+#. translators: wordpress
+#: includes/Admin/Plugins.php:79
+msgid "Important:"
+msgstr "Importante:"
+
+#. translators: wordpress
+#: includes/Admin/Menu.php:140 includes/Admin/Menu.php:142
+#: includes/Admin/Plugins.php:36
+msgid "Settings"
+msgstr "Ajustes"
+
+#: includes/Admin/Permalink.php:66
+msgctxt "Permalink setting, eg: /pos"
+msgid "POS base"
+msgstr "Enlace del TPV"
+
+#: includes/Admin/Orders/List_Orders.php:35
+msgid "Online"
+msgstr "Online"
+
+#: includes/Admin/Menu.php:151 includes/Admin/Products/Single_Product.php:40
+#: includes/Admin/Products/Single_Product.php:107
+msgid "Upgrade to Pro"
+msgstr "Actualizar a Pro"
+
+#: includes/Admin/Menu.php:131 includes/Admin/Menu.php:132
+msgid "View POS"
+msgstr "Ver TPV"
+
+#: includes/Admin/Menu.php:102 includes/Admin/Menu.php:121
+#: includes/Admin/Menu.php:122 includes/Admin/Orders/List_Orders.php:34
+msgid "POS"
+msgstr "TPV"

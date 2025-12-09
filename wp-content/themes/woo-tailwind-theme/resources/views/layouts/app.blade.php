@@ -12,7 +12,7 @@
   <body @php(body_class()) class="">
     @php(wp_body_open())
 
-    <div id="app" >
+    <div id="app" class="bg-black">
       <a class="sr-only focus:not-sr-only" href="#main">
         {{ __('Skip to content', 'sage') }}
       </a>

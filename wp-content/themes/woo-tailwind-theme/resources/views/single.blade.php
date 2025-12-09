@@ -1,51 +1,69 @@
 @extends('layouts.app')
 
 @section('content')
+    {{-- 🔒 Solo permitir este template para productos --}}
+    @if (get_post_type() !== 'product')
+        <div class="container mx-auto px-4 py-12 prose max-w-none">
+            <h1 class="text-4xl font-bold">{{ get_the_title() }}</h1>
+            {!! apply_filters('the_content', get_the_content()) !!}
+        </div>
+        @php return; @endphp
+    @endif
+    
     @php
         global $product;
 
-        if (!is_a($product, 'WC_Product')) {
+        // Asegurar que $product sea un WC_Product válido
+        if (!is_a($product ?? null, 'WC_Product')) {
             $product = wc_get_product(get_the_ID());
         }
 
+        // Si $product sigue siendo inválido, detener ejecución
+        if (!$product || !is_a($product, 'WC_Product')) {
+            echo "<p style='color:red;font-weight:bold;'>Error: este contenido no es un producto válido.</p>";
+            return;
+        }
+
+        // Ahora es seguro llamar métodos del producto:
         $post_thumbnail_id = $product->get_image_id();
         $gallery_ids = $product->get_gallery_image_ids();
-        
+
         // Obtener productos relacionados
         $related_ids = wc_get_related_products($product->get_id(), 4);
-        $related_products = !empty($related_ids) ? wc_get_products(['include' => $related_ids, 'limit' => 4]) : [];
-        
-        // Verificar si es un producto de subasta
+        $related_products = !empty($related_ids)
+            ? wc_get_products(['include' => $related_ids, 'limit' => 4])
+            : [];
+
+        // Detectar si es producto de subasta
         $is_auction = method_exists($product, 'get_type') && $product->get_type() === 'auction';
-        
-        // Métodos específicos para Auctions for WooCommerce
+
+        // Si es subasta, cargar datos del plugin
         if ($is_auction) {
-            // Obtener información de la subasta
-            $current_bid = method_exists($product, 'get_curent_bid') ? $product->get_curent_bid() : 0;
-            $start_price = method_exists($product, 'get_start_price') ? $product->get_start_price() : 0;
-            $bid_increment = method_exists($product, 'get_increase_bid_value') ? $product->get_increase_bid_value() : 5;
-            $reserve_price = method_exists($product, 'get_reserve_price') ? $product->get_reserve_price() : null;
-            $buy_now_price = method_exists($product, 'get_buy_now') ? $product->get_buy_now() : null;
-            
-            // Fechas de la subasta
-            $auction_start = method_exists($product, 'get_auction_start_time') ? $product->get_auction_start_time() : null;
-            $auction_end = method_exists($product, 'get_auction_end_time') ? $product->get_auction_end_time() : null;
-            
+            $current_bid     = $product->get_curent_bid()        ?? 0;
+            $start_price     = $product->get_start_price()       ?? 0;
+            $bid_increment   = $product->get_increase_bid_value() ?? 5;
+            $reserve_price   = $product->get_reserve_price()     ?? null;
+            $buy_now_price   = $product->get_buy_now()           ?? null;
+
+            // Fechas
+            $auction_start = $product->get_auction_start_time() ?? null;
+            $auction_end   = $product->get_auction_end_time()   ?? null;
+
             // Estado de la subasta
-            $is_finished = method_exists($product, 'is_finished') ? $product->is_finished() : false;
-            $is_started = method_exists($product, 'is_started') ? $product->is_started() : false;
-            $is_closed = method_exists($product, 'is_closed') ? $product->is_closed() : false;
-            
-            // Obtener el siguiente valor de puja mínimo
-            $min_bid_value = $start_price;
-            if ($current_bid > 0) {
-                $min_bid_value = $current_bid + $bid_increment;
-            }
-            
-            // Obtener historial de pujas
-            $bid_count = method_exists($product, 'get_auction_bid_count') ? $product->get_auction_bid_count() : 0;
+            $is_finished = $product->is_finished() ?? false;
+            $is_started  = $product->is_started()  ?? false;
+            $is_closed   = $product->is_closed()   ?? false;
+
+            // Mínima puja siguiente
+            $min_bid_value = ($current_bid > 0)
+                ? $current_bid + $bid_increment
+                : $start_price;
+
+            // Historial
+            $bid_count = $product->get_auction_bid_count() ?? 0;
         }
     @endphp
+
 
     <div class="animate-fadeIn min-h-screen bg-white">
         <div class="container mx-auto px-4 py-12">
@@ -89,7 +107,7 @@
                     @if ($is_auction)
                         <div class="auction-info space-y-4 rounded-lg border-2 border-orange-200 bg-orange-50 p-4">
                             <h3 class="text-xl font-bold text-orange-800">SUBASTA EN CURSO</h3>
-                            
+
                             {{-- Precio actual o precio de salida --}}
                             <div class="text-2xl font-bold text-orange-600">
                                 @if ($current_bid && $current_bid > 0)
@@ -98,63 +116,62 @@
                                     Precio de salida: {!! wc_price($start_price) !!}
                                 @endif
                             </div>
-                            
+
                             {{-- Buy it now price --}}
                             @if ($buy_now_price)
                                 <div class="text-xl font-bold text-green-600">
                                     Compra inmediata: {!! wc_price($buy_now_price) !!}
                                 </div>
                             @endif
-                            
+
                             {{-- Información de la subasta --}}
                             <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
                                 @if ($start_price)
                                     <div class="text-sm">
-                                        <span class="font-semibold">Precio de salida:</span> 
+                                        <span class="font-semibold">Precio de salida:</span>
                                         {!! wc_price($start_price) !!}
                                     </div>
                                 @endif
-                                
+
                                 @if ($bid_increment)
                                     <div class="text-sm">
-                                        <span class="font-semibold">Incremento de puja:</span> 
+                                        <span class="font-semibold">Incremento de puja:</span>
                                         {!! wc_price($bid_increment) !!}
                                     </div>
                                 @endif
-                                
+
                                 @if ($reserve_price)
                                     <div class="text-sm">
-                                        <span class="font-semibold">Precio de reserva:</span> 
+                                        <span class="font-semibold">Precio de reserva:</span>
                                         {!! wc_price($reserve_price) !!}
                                     </div>
                                 @endif
-                                
+
                                 @if ($auction_start)
                                     <div class="text-sm">
-                                        <span class="font-semibold">Inicio:</span> 
+                                        <span class="font-semibold">Inicio:</span>
                                         {{ date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($auction_start)) }}
                                     </div>
                                 @endif
-                                
+
                                 @if ($auction_end)
                                     <div class="text-sm">
-                                        <span class="font-semibold">Finaliza:</span> 
+                                        <span class="font-semibold">Finaliza:</span>
                                         {{ date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($auction_end)) }}
                                     </div>
                                 @endif
                             </div>
-                            
+
                             {{-- Temporizador de la subasta --}}
                             @if ($auction_end && !$is_finished)
                                 <div class="auction-timer mt-4">
                                     <h4 class="font-semibold text-orange-700">Tiempo restante:</h4>
-                                    <div id="auction-countdown" class="text-lg font-mono font-bold text-orange-800"
-                                         data-end-time="{{ strtotime($auction_end) }}">
+                                    <div id="auction-countdown" class="font-mono text-lg font-bold text-orange-800" data-end-time="{{ strtotime($auction_end) }}">
                                         Cargando...
                                     </div>
                                 </div>
                             @endif
-                            
+
                             {{-- Estado de la subasta --}}
                             <div class="mt-2">
                                 @if ($is_finished || $is_closed)
@@ -172,41 +189,37 @@
                                 @endif
                             </div>
                         </div>
-                        
+
                         {{-- Formulario de puja --}}
-                        @if ((!$is_finished && !$is_closed) && $is_started)
+                        @if (!$is_finished && !$is_closed && $is_started)
                             <div class="bid-form mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
                                 <h4 class="mb-3 text-lg font-semibold">Realizar una puja</h4>
-                                
+
                                 @if (is_user_logged_in())
                                     {{-- FORMULARIO CORREGIDO - Usando la estructura exacta del plugin --}}
                                     <form class="auction_form cart" method="post" action="{{ esc_url($product->get_permalink()) }}" enctype="multipart/form-data">
-                                        @php 
+                                        @php
                                             do_action('before_auction_form');
                                         @endphp
-                                        
+
                                         <input type="hidden" name="place-bid" value="{{ $product->get_id() }}">
                                         <input type="hidden" name="product_id" value="{{ $product->get_id() }}">
-                                        
+
                                         <div class="flex flex-wrap items-center gap-3">
                                             <label for="bid_value" class="font-medium">Tu puja (mín. {!! wc_price($min_bid_value) !!}):</label>
-                                            <input type="number" id="bid_value" name="bid_value" 
-                                                   class="w-32 rounded border border-gray-300 px-3 py-2"
-                                                   step="any"
-                                                   min="{{ $min_bid_value }}"
-                                                   value="{{ $min_bid_value }}"
-                                                   required>
+                                            <input type="number" id="bid_value" name="bid_value" class="w-32 rounded border border-gray-300 px-3 py-2" step="any"
+                                                min="{{ $min_bid_value }}" value="{{ $min_bid_value }}" required>
                                             <button type="submit" class="rounded-lg bg-orange-600 px-4 py-2 font-medium text-white hover:bg-orange-700">
                                                 Pujar ahora
                                             </button>
                                         </div>
-                                        
-                                        @php 
+
+                                        @php
                                             // Nonce específico de Auctions for WooCommerce
                                             wp_nonce_field('place-bid', '_wpnonce');
                                         @endphp
                                     </form>
-                                    
+
                                     {{-- Botón de compra inmediata --}}
                                     @if ($buy_now_price)
                                         <div class="mt-4">
@@ -224,40 +237,23 @@
                                     <div class="text-sm text-gray-600">
                                         <a href="{{ wp_login_url(get_permalink()) }}" class="text-orange-600 hover:underline">
                                             Inicia sesión
-                                        </a> 
+                                        </a>
                                         para poder pujar en esta subasta.
                                     </div>
                                 @endif
                             </div>
                         @endif
-                        
+
                         {{-- Historial de pujas --}}
                         @if ($bid_count > 0)
                             <div class="bid-history mt-6 rounded-lg border border-gray-200 bg-white p-4">
                                 <h4 class="mb-3 text-lg font-semibold">Historial de pujas ({{ $bid_count }})</h4>
                                 <div class="max-h-60 overflow-y-auto">
                                     @php
-                                        // Usar la función del plugin para mostrar el historial
-                                        if (function_exists('woocommerce_auction_history')) {
-                                            woocommerce_auction_history($product->get_id());
-                                        } else {
-                                            // Fallback: intentar obtener el historial manualmente
-                                            $history = method_exists($product, 'get_auction_history') ? $product->get_auction_history() : array();
-                                            if (!empty($history)) {
-                                                echo '<table class="w-full text-sm">';
-                                                echo '<thead><tr><th class="text-left">Usuario</th><th class="text-right">Puja</th><th class="text-right">Fecha</th></tr></thead>';
-                                                echo '<tbody>';
-                                                foreach ($history as $bid) {
-                                                    echo '<tr>';
-                                                    echo '<td class="px-2 py-1">' . (isset($bid->userid) ? get_userdata($bid->userid)->display_name : 'Anónimo') . '</td>';
-                                                    echo '<td class="px-2 py-1 text-right">' . wc_price($bid->bid) . '</td>';
-                                                    echo '<td class="px-2 py-1 text-right">' . date_i18n(get_option('date_format'), strtotime($bid->date)) . '</td>';
-                                                    echo '</tr>';
-                                                }
-                                                echo '</tbody></table>';
-                                            } else {
-                                                echo '<p class="text-gray-500 text-center">No se puede mostrar el historial de pujas</p>';
-                                            }
+                                        try {
+                                            wc_get_template('single-product/tabs/auction-history.php', ['product' => $product]);
+                                        } catch (\Throwable $th) {
+                                            echo '<p class="text-center text-gray-500">No se puede mostrar el historial de pujas</p>';
                                         }
                                     @endphp
                                 </div>
@@ -318,7 +314,7 @@
 
                                 {{-- Botón de añadir al carrito --}}
                                 <button type="submit" name="add-to-cart" value="{{ $product->get_id() }}"
-                                    class="transform rounded-lg bg-orange-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-orange-700 hover:shadow-purple-300">
+                                    class="transform rounded-lg bg-orange-600 px-6 py-3 font-medium text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-orange-700 hover:shadow-orange-500">
                                     AÑADIR AL CARRITO
                                 </button>
                             </div>
@@ -331,7 +327,7 @@
                                 $current_winner = $product->get_auction_current_bider();
                             }
                         @endphp
-                        
+
                         @if ($current_winner && $current_winner == get_current_user_id())
                             <div class="winner-notice mt-6 rounded-lg bg-green-100 p-4">
                                 <h4 class="text-lg font-semibold text-green-800">¡Felicidades! Has ganado esta subasta.</h4>
@@ -384,12 +380,14 @@
 
             {{-- Tabs de detalles del producto --}}
             <div class="mt-16 overflow-hidden rounded-xl bg-gray-50 shadow-lg transition-all duration-300 hover:shadow-xl">
-                {!! woocommerce_output_product_data_tabs() !!}
+                @if (!$is_auction)
+                    {!! woocommerce_output_product_data_tabs() !!}
+                @endif
             </div>
 
             {{-- Productos relacionados con estilos específicos --}}
             @if (!empty($related_products))
-                <div class="animate-fadeInUp mt-16 related-products-section">
+                <div class="animate-fadeInUp related-products-section mt-16">
                     <div class="mt-16">
                         <h2 class="mb-8 text-2xl font-bold uppercase tracking-wider text-gray-900">TAMBIÉN TE PUEDE INTERESAR</h2>
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -397,15 +395,14 @@
                                 <div class="product-card rounded-xl border p-4 shadow hover:shadow-lg">
                                     <a href="{{ get_permalink($related->get_id()) }}">
                                         @if (has_post_thumbnail($related->get_id()))
-                                            <img src="{{ get_the_post_thumbnail_url($related->get_id(), 'medium') }}" 
-                                                 alt="{{ $related->get_name() }}" 
-                                                 class="mx-auto rounded-lg product-image">
+                                            <img src="{{ get_the_post_thumbnail_url($related->get_id(), 'medium') }}" alt="{{ $related->get_name() }}"
+                                                class="product-image mx-auto rounded-lg">
                                         @else
-                                            <div class="mx-auto rounded-lg bg-gray-200 flex items-center justify-center product-image-placeholder">
+                                            <div class="product-image-placeholder mx-auto flex items-center justify-center rounded-lg bg-gray-200">
                                                 <span class="text-gray-500">Sin imagen</span>
                                             </div>
                                         @endif
-                                        <h3 class="mt-2 text-lg font-semibold text-center">{{ $related->get_name() }}</h3>
+                                        <h3 class="mt-2 text-center text-lg font-semibold">{{ $related->get_name() }}</h3>
                                         <div class="price-container mt-2 text-center">
                                             {!! $related->get_price_html() !!}
                                         </div>
@@ -421,29 +418,66 @@
 
     <style>
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideInRight {
-            from { transform: translateX(20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         @keyframes fadeInUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         @keyframes zoomIn {
-            from { transform: scale(0.95); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
         }
 
-        .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
-        .animate-slideInRight { animation: slideInRight 0.5s ease-out; }
-        .animate-fadeInUp { animation: fadeInUp 0.5s ease-out; }
-        .animate-zoomIn { animation: zoomIn 0.5s ease-out; }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .animate-slideInRight {
+            animation: slideInRight 0.5s ease-out;
+        }
+
+        .animate-fadeInUp {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .animate-zoomIn {
+            animation: zoomIn 0.5s ease-out;
+        }
 
         .related-products-section {
             margin-top: 4rem;
@@ -561,22 +595,22 @@
         .auction-info {
             transition: all 0.3s ease;
         }
-        
+
         .bid-form input:focus {
             outline: none;
             ring: 2px;
             ring-color: #f19f32;
         }
-        
+
         .bid-history table {
             border-collapse: collapse;
         }
-        
+
         .bid-history th,
         .bid-history td {
             border: 1px solid #e5e7eb;
         }
-        
+
         .auction-timer {
             padding: 10px;
             background: #ee9038;
@@ -588,28 +622,29 @@
             .related-products-section .grid {
                 gap: 1rem;
             }
-            
-            .product-image, .product-image-placeholder {
+
+            .product-image,
+            .product-image-placeholder {
                 height: 150px;
             }
-            
+
             .product-card h3 {
                 font-size: 1rem;
             }
-            
+
             .price-container .amount {
                 font-size: 1rem;
             }
-            
+
             .auction-info .grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .bid-form .flex {
                 flex-direction: column;
                 align-items: flex-start;
             }
-            
+
             .bid-form input {
                 width: 100%;
                 margin: 0.5rem 0;
@@ -620,12 +655,12 @@
     <script>
         window.onload = function() {
             window.scrollTo(0, 0);
-            
+
             const countdownElement = document.getElementById('auction-countdown');
             if (countdownElement) {
                 const endTime = parseInt(countdownElement.getAttribute('data-end-time')) * 1000;
                 updateCountdown(endTime, countdownElement);
-                
+
                 setInterval(() => updateCountdown(endTime, countdownElement), 1000);
             }
         };
@@ -633,21 +668,21 @@
         function updateCountdown(endTime, element) {
             const now = new Date().getTime();
             const distance = endTime - now;
-            
+
             if (distance < 0) {
                 element.innerHTML = "SUBASTA FINALIZADA";
                 return;
             }
-            
+
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            
+
             let countdownText = '';
             if (days > 0) countdownText += `${days}d `;
             countdownText += `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
+
             element.innerHTML = countdownText;
         }
 
@@ -659,7 +694,7 @@
             $('.auction_form').on('submit', function(e) {
                 const bidValue = parseFloat($('#bid_value').val());
                 const minBid = parseFloat($('#bid_value').attr('min'));
-                
+
                 if (bidValue < minBid) {
                     e.preventDefault();
                     alert(`La puja mínima es ${minBid.toFixed(2)}`);

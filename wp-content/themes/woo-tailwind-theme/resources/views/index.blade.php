@@ -58,6 +58,12 @@
                 .product-slide h4 {
                     font-size: 14px !important;
                 }
+
+                /* Separar Torneos de TCG */
+                .item:nth-child(2),
+                .item:last-child {
+                    margin-left: auto;
+                }
             }
 
             @media (min-width: 1024px) {
@@ -126,8 +132,26 @@
 
         <!-- Sección de Categorías Centrada -->
         <div class="relative overflow-hidden py-2">
-            <div class="px-2">
-                <div class="flex flex-wrap justify-center gap-3 text-sm sm:text-base">
+            <div class="flex flex-col items-center justify-center px-2 sm:flex-row">
+                <div class="item order-3 mb-2 mt-3 flex items-center justify-center gap-4 text-sm sm:order-1 sm:mb-0 sm:mt-0 sm:text-base">
+                    <a href="https://geekcollector.com/twitch/">
+                        <div class="flex cursor-pointer items-center gap-2 text-orange-400">
+                            <!-- Indicador "en vivo" -->
+                            <span class="relative flex h-3 w-3">
+                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
+                                <span class="relative inline-flex h-3 w-3 rounded-full bg-red-600"></span>
+                            </span>
+
+                            <span class="text-white hover:text-orange-400">TWITCH</span>
+                            <svg class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path
+                                    d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" />
+                            </svg>
+                        </div>
+
+                    </a>
+                </div>
+                <div class="item order-1 flex flex-wrap justify-center gap-3 text-sm sm:order-2 sm:text-base">
                     <a href="https://geekcollector.com/product-category/tcg/magic-the-gathering/" class="flex items-center text-white transition hover:text-orange-400">
                         <span>MAGIC</span>
                         <svg class="ml-1 h-3 w-3" fill="#ff8000" viewBox="0 0 52 52">
@@ -169,22 +193,19 @@
                         <svg fill="currentColor" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
                             class="ml-1 h-3 w-3" viewBox="796 796 200 200" enable-background="new 796 796 200 200" xml:space="preserve">
                             <g>
-                                <path d="M936.46,868.211c4.939,4.94,12.946,4.938,17.884,0c4.94-4.938,4.941-12.946,0-17.885l-50.619-50.622
-                                                      c-4.94-4.94-12.947-4.938-17.887,0c-4.939,4.938-4.939,12.946,0,17.885L936.46,868.211z" />
-                                <path d="M817.588,885.841c-4.938-4.94-12.946-4.94-17.884,0c-4.939,4.938-4.941,12.945,0,17.885l50.619,50.619
-                                                      c4.94,4.94,12.946,4.94,17.887,0c4.94-4.938,4.94-12.946,0-17.886L817.588,885.841z" />
-                                <path d="M989.605,963.929l-75.06-63.993c3.388-3.902,6.598-7.964,9.563-12.216l1.549-2.22c3.202-4.592,2.651-10.82-1.308-14.779
-                                                      L883.328,829.7c-3.959-3.959-10.187-4.509-14.779-1.307l-3.618,2.523c-13.254,9.244-24.769,20.759-34.014,34.012l-2.524,3.619
-                                                      c-3.203,4.593-2.653,10.822,1.306,14.78l41.023,41.021c3.959,3.959,10.186,4.51,14.778,1.307l2.22-1.549
-                                                      c4.25-2.964,8.312-6.172,12.213-9.558l63.994,75.058c3.297,3.867,8.06,6.181,13.136,6.38c5.079,0.202,10.01-1.725,13.603-5.317
-                                                      c3.595-3.593,5.522-8.523,5.32-13.602C995.785,971.988,993.471,967.227,989.605,963.929z" />
+                                <path
+                                    d="M936.46,868.211c4.939,4.94,12.946,4.938,17.884,0c4.94-4.938,4.941-12.946,0-17.885l-50.619-50.622 c-4.94-4.94-12.947-4.938-17.887,0c-4.939,4.938-4.939,12.946,0,17.885L936.46,868.211z" />
+                                <path
+                                    d="M817.588,885.841c-4.938-4.94-12.946-4.94-17.884,0c-4.939,4.938-4.941,12.945,0,17.885l50.619,50.619 c4.94,4.94,12.946,4.94,17.887,0c4.94-4.938,4.94-12.946,0-17.886L817.588,885.841z" />
+                                <path
+                                    d="M989.605,963.929l-75.06-63.993c3.388-3.902,6.598-7.964,9.563-12.216l1.549-2.22c3.202-4.592,2.651-10.82-1.308-14.779 L883.328,829.7c-3.959-3.959-10.187-4.509-14.779-1.307l-3.618,2.523c-13.254,9.244-24.769,20.759-34.014,34.012l-2.524,3.619 c-3.203,4.593-2.653,10.822,1.306,14.78l41.023,41.021c3.959,3.959,10.186,4.51,14.778,1.307l2.22-1.549 c4.25-2.964,8.312-6.172,12.213-9.558l63.994,75.058c3.297,3.867,8.06,6.181,13.136,6.38c5.079,0.202,10.01-1.725,13.603-5.317 c3.595-3.593,5.522-8.523,5.32-13.602C995.785,971.988,993.471,967.227,989.605,963.929z" />
                             </g>
                         </svg>
                     </a>
 
                     <a href="https://geekcollector.com/torneos/" class="flex items-center text-orange-400 transition">
                         <span class="text-white hover:text-orange-400">CALENDARIO</span>
-                        <svg class="ml-1 h-4 w-4" viewBox="0 0 24 24" fill="" xmlns="http://www.w3.org/2000/svg" stroke="currentColor">
+                        <svg class="ml-1 h-4 w-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke="currentColor">
                             <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                             <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                             <g id="SVGRepo_iconCarrier">
@@ -195,13 +216,43 @@
                         </svg>
                     </a>
                 </div>
+                <div class="item order-2 mt-3 flex items-center justify-center gap-4 text-sm sm:order-3 sm:mt-0 sm:text-base">
+                    <a href="https://geekcollector.com/tournaments/">
+                        <div class="flex cursor-pointer items-center gap-1 text-orange-400">
+                            <span class="text-white hover:text-orange-400">TORNEOS</span>
+                            <svg class="h-3 w-4" fill="#ff8000" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                                <g>
+                                    <path
+                                        d="M348.375,384.758c-12.811-25.137-32.785-44.594-56.582-54.492v-38.5l0.047-9.133c-0.016,0-0.031,0-0.047,0.004 v-0.242c-11.588,2.262-23.551,3.481-35.791,3.481c-11.369,0-22.476-1.094-33.291-3.055c-0.752-0.152-1.516-0.262-2.264-0.426v0.043 c-0.08-0.016-0.16-0.028-0.24-0.043v47.871c-12.209,5.078-23.393,12.695-33.137,22.293c-0.348,0.34-0.705,0.66-1.049,1.004 c-1.072,1.082-2.1,2.219-3.133,3.348c-0.705,0.77-1.426,1.512-2.115,2.305c-0.61,0.703-1.184,1.442-1.78,2.156 c-1.07,1.289-2.14,2.574-3.168,3.918c-0.088,0.117-0.17,0.238-0.26,0.355c-4.392,5.789-8.406,12.078-11.939,18.875h0.131 c-0.043,0.082-0.09,0.16-0.131,0.238H348.375z" />
+                                    <polygon points="115.046,416 115.046,511.371 115.044,511.758 115.046,511.758 115.046,512 396.957,512 396.957,416" />
+                                    <path
+                                        d="M498.331,29.387c-8.027-9.094-19.447-14.312-31.328-14.312h-47.744V0.27V0.242l0,0V0H92.742v15.074H44.999 c-11.887,0-23.306,5.218-31.336,14.312C3.906,40.442-0.305,56.43,1.775,74.465c0.369,7.922,4.367,49.316,47.211,78.77 c24.732,17.008,48.424,24.629,69.44,27.938c29.008,45.328,79.76,75.398,137.576,75.398c57.805,0,108.558-30.07,137.568-75.398 c21.016-3.305,44.709-10.93,69.445-27.938c42.84-29.453,46.842-70.848,47.211-78.77C512.304,56.43,508.093,40.442,498.331,29.387z" />
+                                </g>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="https://geekcollector.com/ladders">
+                        <div class="flex cursor-pointer items-center gap-1 text-orange-400">
+                            <span class="text-white hover:text-orange-400">LADDER</span>
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="#ff8000" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12.93,6.81a1,1,0,0,1-.47-.12L12,6.45l-.46.24a1,1,0,0,1-1.45-1.05l.09-.52L9.8,4.76a1,1,0,0,1,.56-1.7L10.87,3l.23-.47a1,1,0,0,1,1.8,0l.23.47.51.08a1,1,0,0,1,.56,1.7l-.38.36.09.52a1,1,0,0,1-.39,1A1.09,1.09,0,0,1,12.93,6.81Z" />
+                                <path
+                                    d="M8,16v5a1,1,0,0,1-1,1H3a1,1,0,0,1-1-1V16a1,1,0,0,1,1-1H7A1,1,0,0,1,8,16Zm6-7H10a1,1,0,0,0-1,1V21a1,1,0,0,0,1,1h4a1,1,0,0,0,1-1V10A1,1,0,0,0,14,9Zm7,4H17a1,1,0,0,0-1,1v7a1,1,0,0,0,1,1h4a1,1,0,0,0,1-1V14A1,1,0,0,0,21,13Z" />
+                            </svg>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
 
         <!-- Banner Hero Responsivo -->
         <div class="relative my-2 aspect-[4/3] w-full overflow-hidden sm:aspect-[16/7] md:aspect-[16/6]">
-            <img src="{{ asset('resources/images/Banner_Agosto_26.png') }}" class="absolute h-full w-full object-cover object-center" alt="Banner principal" />
+            <img src="{{ asset('resources/images/banner/Banner_Octubre_01.png') }}" class="absolute h-full w-full object-contain object-center" alt="Banner principal" />
         </div>
+
+        {{-- <div class="bg-white">{{ do_shortcode('[ekc-swiss-system tournament="swup" ranking="true"]') }}</div> --}}
 
         <!-- Slider TCGs Centrado -->
         <div class="mx-auto mt-2 px-2 py-2">
@@ -241,7 +292,6 @@
                     <div>LOS PRODUCTOS GEEK QUE MÁS AMAS.</div>
                 </div>
             </div>
-
             @php
                 $args = [
                     'post_type' => 'product',
@@ -254,6 +304,14 @@
                             'key' => '_stock_status',
                             'value' => 'instock',
                             'compare' => '=',
+                        ],
+                    ],
+                    'tax_query' => [
+                        [
+                            'taxonomy' => 'product_cat',
+                            'field' => 'slug', // puedes usar 'id' si prefieres
+                            'terms' => ['drinks', 'snacks'], // Slugs de las categorías
+                            'operator' => 'NOT IN',
                         ],
                     ],
                 ];
@@ -270,26 +328,29 @@
                             $loop->the_post();
                             global $product;
                         @endphp
-                        <!-- Slide -->
-                        <div class="swiper-slide">
-                            <a href="{{ esc_url($product->get_permalink()) }}" class="block">
-                                <div
-                                    class="product-slide group relative flex flex-col items-center justify-center gap-y-1 rounded-2xl border-white bg-black px-1 py-4 shadow-[0_0px_10px_rgba(0,0,0,0)] shadow-white/40 sm:gap-y-2 sm:px-2">
-                                    <div style="min-height: calc(2 * 1.5em);" class="ml-1 w-full overflow-hidden text-center font-semibold text-white sm:px-1">
-                                        <h4>{{ $product->get_name() }}</h4>
-                                    </div>
-                                    <div class="flex h-full w-full items-center justify-center overflow-hidden rounded-md">
-                                        {!! $product->get_image('thumbnail', ['class' => 'h-full w-full object-contain']) !!}
-                                    </div>
-                                    <div class="ml-1 flex items-start">
-                                        <div
-                                            class="absolute bottom-2 z-10 -translate-x-1/2 rounded-full px-2 py-1 text-xs font-bold text-black opacity-0 transition-all duration-200 group-hover:bg-orange-600 group-hover:opacity-100 sm:text-sm">
-                                            Comprar
+                        <!-- Que no tome productos sin imagen -->
+                        @if (has_post_thumbnail($product->get_id()))
+                            <!-- Slide -->
+                            <div class="swiper-slide">
+                                <a href="{{ esc_url($product->get_permalink()) }}" class="block">
+                                    <div
+                                        class="product-slide group relative flex flex-col items-center justify-center gap-y-1 rounded-2xl border-white bg-black px-1 py-4 shadow-[0_0px_10px_rgba(0,0,0,0)] shadow-white/40 sm:gap-y-2 sm:px-2">
+                                        <div style="min-height: calc(2 * 1.5em);" class="ml-1 w-full overflow-hidden text-center font-semibold text-white sm:px-1">
+                                            <h4> {{ mb_strtoupper($product->get_name(), 'UTF-8') }} </h4>
+                                        </div>
+                                        <div class="flex h-full w-full items-center justify-center overflow-hidden rounded-md">
+                                            {!! $product->get_image('thumbnail', ['class' => 'h-full w-full object-contain']) !!}
+                                        </div>
+                                        <div class="ml-1 flex items-start">
+                                            <div
+                                                class="absolute bottom-2 z-10 -translate-x-1/2 rounded-full px-2 py-1 text-xs font-bold text-black opacity-0 transition-all duration-200 group-hover:bg-orange-600 group-hover:opacity-100 sm:text-sm">
+                                                Comprar
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </a>
-                        </div>
+                                </a>
+                            </div>
+                        @endif
                     @endwhile
                 </div>
 
@@ -298,6 +359,7 @@
                 <!-- Add pagination -->
 
             </div>
+
         </div>
 
         <!-- Banner de Membresia -->
@@ -355,23 +417,22 @@
                         'url' => 'https://geekcollector.com/product-category/tcg/lorcana/reign-of-jafar/',
                     ],
                     [
-                        'img' => 'magic.png',
+                        'img' => 'magic_spiderman.jpg',
                         'tcg' => 'MAGIC: THE GATHERING',
-                        'name' => 'EDGE OF ETERNITIES',
-                        'release' => 'Agosto 1, 2025',
-                        'url' => 'https://geekcollector.com/product-category/tcg/magic-the-gathering/edge-of-eternities/',
+                        'name' => 'SPIDERMAN',
+                        'url' => 'https://geekcollector.com/product-category/tcg/magic-the-gathering/spiderman/',
                     ],
                     [
-                        'img' => 'onepiece.png',
+                        'img' => 'onepiece_prb_02.png',
                         'tcg' => 'ONE-PIECE',
-                        'name' => 'LEGACY OF THE MASTER [OP-12]',
-                        'url' => 'https://geekcollector.com/product-category/tcg/one-piece/op12-legacy-of-the-master/',
+                        'name' => 'Premium Booster Vol.2 [PRB-02]',
+                        'url' => 'https://geekcollector.com/product-category/tcg/one-piece/prb02-premium-booster/',
                     ],
                     [
-                        'img' => 'pokemon.png',
+                        'img' => 'pokemon_megaevo.png',
                         'tcg' => 'POKEMON',
-                        'name' => 'BLACK BOLT AND WHITE FLARE',
-                        'url' => 'https://geekcollector.com/product-category/tcg/pokemon/sv-black-bolt-white-flare/',
+                        'name' => 'Mega Evolution',
+                        'url' => 'https://geekcollector.com/product-category/tcg/pokemon/mega01mega-evolutions/',
                     ],
                 ];
             @endphp
@@ -503,7 +564,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Boton Ver Mas -->  
+                                <!-- Boton Ver Mas -->
                                 <div class="inline-block">
                                     <a href="{{ $post['url'] }}">
                                         <span class="bg-gradient-to-r from-yellow-200 via-orange-600 to-red-600 bg-clip-text text-2xl font-bold text-transparent">
