@@ -1,6 +1,35 @@
 @extends('layouts.app')
 
 @section('content')
+    <!-- Logica de min y max -->
+    @php
+        $max_price = 0;
+        $min_price = PHP_FLOAT_MAX;
+
+        $search_term = htmlspecialchars_decode(get_search_query());
+
+        $all_search_results = new WP_Query([
+            's' => $search_term,
+            'post_type' => 'product',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'ignore_price_filter' => true,
+        ]);
+
+        if ($all_search_results->have_posts()) {
+            foreach ($all_search_results->posts as $product_id) {
+                $product = wc_get_product($product_id);
+                if ($product) {
+                    $price = $product->get_price();
+                    $max_price = max($max_price, (float) $price);
+                    $min_price = min($min_price, (float) $price);
+                }
+            }
+            wp_reset_postdata();
+        } else {
+            $min_price = 0;
+        }
+    @endphp
     <script src="https://cdn.jsdelivr.net/npm/nouislider@latest/dist/nouislider.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@latest/dist/nouislider.min.css">
     <!-- Hero de búsqueda con animación mejorada -->
@@ -18,7 +47,7 @@
             </h2>
             <span
                 class="mt-2 inline-block transform rounded-full bg-gradient-to-r from-orange-600 to-orange-500 px-8 py-3 text-xl font-bold tracking-wide text-white transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/30">
-                {{ get_search_query() }}
+                {!! get_search_query() !!}
             </span>
         </div>
     </div>
@@ -61,7 +90,16 @@
                                 Aplicar Filtro
                             </button>
                         </form>
-
+                        @if (isset($_GET['min_price']) || isset($_GET['max_price']))
+                            <form action="">
+                                <input type="hidden" name="s" value="{{ $_GET['s'] }}">
+                                <input type="hidden" name="post_type" value="{{ $_GET['post_type'] }}">
+                                <button
+                                    class="mt-4 w-full cursor-pointer rounded-full bg-gradient-to-r from-orange-500 to-orange-600 px-5 py-2 text-sm font-bold uppercase text-white shadow transition-all hover:scale-105 hover:from-orange-500 hover:to-orange-600 hover:shadow-lg hover:shadow-orange-500/30">
+                                    Reset
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 </div>
 
@@ -187,7 +225,7 @@
                             <div class="p-5">
                                 <div class="mb-3 flex items-start justify-between">
                                     <h3 class="text-lg font-bold text-white transition-colors hover:text-orange-400">
-                                        <a href="{{ get_permalink() }}">{{ get_the_title() }}</a>
+                                        <a href="{{ get_permalink() }}">{!! get_the_title() !!}</a>
                                     </h3>
                                     <!-- Rating -->
                                     <div class="flex items-center rounded-full bg-gray-800 px-2 py-1">
@@ -257,33 +295,6 @@
             @endif
         </section>
     </div>
-
-    <!-- Logica de min y max -->
-    @php
-        $max_price = 0;
-        $min_price = PHP_FLOAT_MAX;
-
-        $all_search_results = new WP_Query([
-            's' => get_search_query(),
-            'post_type' => 'product',
-            'posts_per_page' => -1,
-            'fields' => 'ids',
-        ]);
-
-        if ($all_search_results->have_posts()) {
-            foreach ($all_search_results->posts as $product_id) {
-                $product = wc_get_product($product_id);
-                if ($product) {
-                    $price = $product->get_price();
-                    $max_price = max($max_price, (float) $price);
-                    $min_price = min($min_price, (float) $price);
-                }
-            }
-            wp_reset_postdata();
-        } else {
-            $min_price = 0;
-        }
-    @endphp
 
     <!-- Estilos personalizados -->
     <style>

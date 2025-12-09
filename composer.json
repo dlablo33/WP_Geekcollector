@@ -1,5 +1,8 @@
 {
     "require": {
-        "roots/acorn": "^5.0"
+        "roots/acorn": "^5.0",
+        "pkpass/pkpass": "^2.5",
+        "google/apiclient": "^2.18",
+        "firebase/php-jwt": "^6.11"
     }
 }

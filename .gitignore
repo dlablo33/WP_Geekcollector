@@ -79,3 +79,5 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+wp-content/themes/woo-tailwind-theme/assets/pass/google-wallet-key.json
+

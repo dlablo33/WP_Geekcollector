@@ -120,6 +120,7 @@ echo ' -->';
         <title>Perfil de Usuario - <?php echo $user->display_name; ?></title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;500;600;700&family=Roboto+Mono:wght@300;400;500&display=swap');
 
@@ -156,7 +157,8 @@ echo ' -->';
                 border: 2px solid #ff4655;
             }
 
-            .tcg-item {
+            .tcg-item,
+            .stat-item {
                 transition: all 0.3s ease;
             }
 
@@ -194,10 +196,159 @@ echo ' -->';
                     flex-direction: column;
                 }
             }
+
+            .gamipress-achievement {
+                display: flex;
+                flex-direction: column;
+                text-align: center;
+                align-items: center;
+                min-width: 100%;
+            }
+
+            .gamipress-achievement-title a {
+                font-size: 1rem !important;
+            }
+
+            .gamipress-achievement-excerpt {
+                font-size: 0.75rem !important;
+                color: #99a1af !important;
+            }
+
+            .gamipress-achievement-thumbnail {
+                width: 100px;
+                height: 100px;
+            }
+
+            .swiper-button-next,
+            .swiper-button-prev {
+                color: #ff6600;
+            }
         </style>
     </head>
 
+    @php
+        $user_id = get_current_user_id();
+        $player = trn_get_player($user_id);
+        $player = trn_the_player($player);
+
+        // Usar el shortcode para el récord y parsear los datos si quieres
+        $record = do_shortcode('[trn-career-record competitor_type="players" competitor_id="' . intval($player->user_id) . '"]');
+
+        // Inicializamos variables
+        $ladder_id = 1; //Ladder que queramos mostrar
+        $ranking_actual = 0;
+        $puntos_totales = 0;
+        $torneos_jugados = 0;
+        $victorias_totales = 0;
+        $top3 = 0;
+        $omw = 0;
+
+        // Extraer datos del string $record con regex (si viene en formato "3 - 1 - 0 (3 - 1 - 0 in singles)")
+        if (preg_match('/(\d+)\s*-\s*(\d+)\s*-\s*(\d+)/', $record, $matches)) {
+            $victorias_totales = intval($matches[1]);
+            $top3 = intval($matches[2]);
+            $torneos_jugados = intval($matches[3]);
+        }
+
+        // Para ranking, puntos, K/D: solo si el plugin tiene shortcodes o meta fields, por ahora dejamos 0
+
+    @endphp
+
+    @php
+        global $wpdb;
+        $user_id = get_current_user_id();
+
+        // Tabla de matches
+        $matches_table = $wpdb->prefix . 'trn_matches';
+        $tournaments_table = $wpdb->prefix . 'trn_tournaments';
+        $ladders_entries = $wpdb->prefix . 'trn_ladders_entries';
+        $tournaments_entries = $wpdb->prefix . 'trn_tournaments_entries';
+
+        //Estrellas Torneos
+        $estrellas = $wpdb->get_results(
+            $wpdb->prepare(
+                "
+                    SELECT $matches_table.one_competitor_id, $matches_table.two_competitor_id
+                    FROM $matches_table
+                    INNER JOIN (
+                    SELECT competition_id, MAX(match_id) as max_match_id
+                    FROM $matches_table
+                    WHERE competition_type LIKE '%tournaments%'
+                    AND two_competitor_id = 0
+                    GROUP BY competition_id
+                    ) latest ON $matches_table.competition_id = latest.competition_id AND $matches_table.match_id = latest.max_match_id
+                    INNER JOIN $tournaments_table ON $matches_table.competition_id = $tournaments_table.tournament_id
+                    WHERE $tournaments_table.status = 'complete'
+                ",
+            ),
+        );
+
+        // Torneos jugados (contando matches donde aparece el jugador) FALTA
+        $torneos_jugados = intval(
+            $wpdb->get_var(
+                $wpdb->prepare(
+                    "
+                        SELECT COUNT(DISTINCT tournament_id)
+                        FROM $tournaments_entries
+                        WHERE competitor_id = %d
+                    ",
+                    $user_id,
+                ),
+            ),
+        );
+
+        // Ranking actual (si el jugador está en alguna ladder activa)
+        $rankings = $wpdb->get_col(
+            $wpdb->prepare(
+                "
+                    SELECT competitor_id
+                    FROM $ladders_entries
+                    WHERE ladder_id = %d
+                    ORDER BY points DESC
+                ",
+                $ladder_id,
+            ),
+        );
+
+        $ranking_actual = array_search($user_id, $rankings) + 1;
+
+        // Puntos totales (si existe columna points en ladders_entries)
+        $puntos_totales =
+            $wpdb->get_var(
+                $wpdb->prepare(
+                    "
+                        SELECT SUM(points)
+                        FROM $ladders_entries
+                        WHERE competitor_id = %d
+                    ",
+                    $user_id,
+                ),
+            ) ?? 0;
+
+        // OMW% (winrate en ladder) ESTA COMO WR% CAMBIAR A OMW% CON SWISS TOURNAMENT
+        $results = $wpdb->get_row(
+            $wpdb->prepare(
+                "
+                    SELECT wins,losses,draws
+                    FROM $ladders_entries
+                    WHERE competitor_id = %d
+                ",
+                $user_id,
+            ),
+        );
+
+        try {
+            $total_games = $results->wins + $results->losses + $results->draws;
+            $points = $results->wins + $results->draws * 0.5;
+            $omw = ($points / $total_games) * 100;
+        } catch (\Throwable $th) {
+            $omw = 0;
+        }
+
+    @endphp
+
     <body class="flex min-h-screen items-center justify-center">
+
         <div class="card w-full max-w-6xl p-4 md:p-8">
             <!-- Header con información de suscripción -->
             <div class="mb-8 flex flex-col items-center justify-between border-b border-gray-700 pb-6 md:flex-row">
@@ -237,7 +388,7 @@ echo ' -->';
             </div>
 
             <!-- Perfil de usuario -->
-            <div class="mb-10 flex flex-col items-center gap-6 md:flex-row">
+            <div class="flex flex-col items-center gap-6 md:flex-row">
                 <!-- Contenedor del avatar y el nombre con el botón al lado -->
                 <div class="flex items-center gap-4">
                     <!-- Mostrar el avatar -->
@@ -272,19 +423,45 @@ echo ' -->';
                         </h2>
                         <p class="text-sm opacity-70">Collector Tag: <?php echo $collector_tag; ?></p>
                         <p class="text-xs text-gray-400">Miembro desde <?php echo $join_date; ?></p>
+
+                    </div>
+                </div>
+
+                <div class="ml-auto">
+                    @php
+                        $numE = 0;
+                    @endphp
+                    @foreach ($estrellas as $estrella)
+                        @if ($estrella->one_competitor_id == $user_id)
+                            @php
+                                $numE = $numE + 1;
+                            @endphp
+                        @endif
+                    @endforeach
+                    <div class="flex">
+                        @if ($numE > 0)
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="flex items-end">{{ $numE }} x <i class="fa-solid fa-star text-4xl text-orange-500"></i></div>
+                                <div class="mt-2 text-center font-light leading-none">Torneos <br> Semanales</div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
 
             <!-- Formulario oculto para cargar una nueva foto de perfil -->
-            <div id="avatar-upload-form" class="mt-6 hidden text-center md:text-left">
-                <form method="post" enctype="multipart/form-data" class="rounded-lg bg-gray-800 p-6 shadow-md">
-                    <label for="avatar" class="mb-2 block text-sm font-medium text-gray-300">Sube una nueva foto de perfil:</label>
+            <div id="avatar-upload-form" class="mb-6 mt-6 max-h-0 overflow-hidden text-center transition-all duration-300 md:text-left">
+                <form method="post" enctype="multipart/form-data" class="rounded-lg bg-gray-800 px-6 py-2 shadow-md">
+                    <label for="avatar" class="mb-2 block py-2 text-sm font-medium text-gray-300">Sube una nueva foto de perfil:</label>
                     <input type="file" name="avatar" accept="image/*"
-                        class="mb-4 block w-full rounded-lg bg-gray-700 p-3 text-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        class="mb-2 block w-full rounded-lg bg-gray-700 p-3 text-sm text-gray-200 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     <button type="submit"
-                        class="inline-block transform rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-2 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-purple-700">
+                        class="inline-block transform rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-2 py-2 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-purple-700">
                         Subir Foto
+                    </button>
+                    <button type="button" id="close-img-form"
+                        class="inline-block transform rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-4 py-2 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-blue-600 hover:to-purple-700">
+                        Cancelar
                     </button>
                 </form>
             </div>
@@ -314,9 +491,27 @@ echo ' -->';
 
             <!-- Script para mostrar el formulario cuando se haga clic en el botón -->
             <script>
-                document.getElementById('change-avatar-btn-inline').addEventListener('click', function() {
-                    document.getElementById('avatar-upload-form').classList.toggle('hidden');
+                const avatarForm = document.getElementById('avatar-upload-form');
+                const toggleBtn = document.getElementById('change-avatar-btn-inline');
+                const cancelBtn = document.getElementById('close-img-form');
+
+                function showForm() {
+                    avatarForm.style.maxHeight = avatarForm.scrollHeight + "px";
+                }
+
+                function hideForm() {
+                    avatarForm.style.maxHeight = "0";
+                }
+
+                toggleBtn.addEventListener('click', () => {
+                    if (avatarForm.style.maxHeight && avatarForm.style.maxHeight !== "0px") {
+                        hideForm();
+                    } else {
+                        showForm();
+                    }
                 });
+
+                cancelBtn.addEventListener('click', hideForm);
             </script>
 
             <!-- División principal en dos columnas -->
@@ -328,59 +523,156 @@ echo ' -->';
                         <h3 class="mb-4 flex items-center gap-2 text-xl font-bold">
                             <i class="fas fa-crosshairs text-red-500"></i> Geek Stats
                         </h3>
+
                         <div class="grid grid-cols-2 gap-4 text-center md:grid-cols-3">
-                            <div class="rank-badge rounded-xl p-4">
-                                <p class="text-3xl font-bold">0</p>
-                                <p class="mt-1 text-xs">Ranking Actual</p>
+                            <div class="stat-item rounded-xl bg-gray-800 p-4">
+                                <p class="text-3xl font-bold">{{ $ranking_actual }}</p>
+                                <p class="text-xs">Ranking Actual</p>
                             </div>
-                            <div class="rounded-xl bg-gray-800 p-4">
-                                <p class="text-3xl font-bold">0</p>
+                            <div class="stat-item rounded-xl bg-gray-800 p-4">
+                                <p class="text-3xl font-bold">{{ $puntos_totales }}</p>
                                 <p class="text-xs">Puntos Totales</p>
                             </div>
-                            <div class="rounded-xl bg-gray-800 p-4">
-                                <p class="text-3xl font-bold">0</p>
+                            <div class="stat-item rounded-xl bg-gray-800 p-4">
+                                <p class="text-3xl font-bold">{{ $torneos_jugados }}</p>
                                 <p class="text-xs">Torneos Jugados</p>
                             </div>
-                            <div class="rounded-xl bg-gray-800 p-4">
-                                <p class="text-3xl font-bold">0</p>
+                            <div class="stat-item rounded-xl bg-gray-800 p-4">
+                                <p class="text-3xl font-bold">{{ $victorias_totales }}</p>
                                 <p class="text-xs">Victorias Totales</p>
                             </div>
-                            <div class="rounded-xl bg-gray-800 p-4">
-                                <p class="text-3xl font-bold">0</p>
+                            <div class="stat-item rounded-xl bg-gray-800 p-4">
+                                <p class="text-3xl font-bold">{{ $top3 }}</p>
                                 <p class="text-xs">Top 3 Acumulados</p>
                             </div>
-                            <div class="rounded-xl bg-gray-800 p-4">
-                                <p class="text-3xl font-bold">0</p>
-                                <p class="text-xs">K/D Ratio</p>
+                            <div class="stat-item rounded-xl bg-gray-800 p-4">
+                                <p class="text-3xl font-bold">{{ $omw }}%</p>
+                                <p class="text-xs">OMW%</p>
                             </div>
                         </div>
 
                         <div class="mt-6">
-                            <h4 class="mb-2 font-semibold">Agentes más jugados</h4>
+                            <h4 class="mb-2 font-semibold">Últimos oponentes</h4>
                             <div class="flex gap-4">
-                                <div class="text-center">
-                                    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 md:h-16 md:w-16">
-                                        <i class="fas fa-question text-gray-400"></i>
+                                @php
+                                    $user_id = get_current_user_id();
+                                    $recent_opponents = [];
+                                    if ($user_id) {
+                                        global $wpdb;
+                                        $matches = $wpdb->get_results(
+                                            $wpdb->prepare(
+                                                "SELECT one_competitor_id, two_competitor_id
+                                                FROM {$wpdb->prefix}trn_matches
+                                                WHERE one_competitor_id = %d OR two_competitor_id = %d
+                                                ORDER BY match_id DESC
+                                                LIMIT 6",
+                                                $user_id,
+                                                $user_id,
+                                            ),
+                                        );
+
+                                        foreach ($matches as $match) {
+                                            $opponent_id = $match->one_competitor_id == $user_id ? $match->two_competitor_id : $match->one_competitor_id;
+                                            if ($opponent_id && !in_array($opponent_id, $recent_opponents)) {
+                                                $recent_opponents[] = $opponent_id;
+                                            }
+                                        }
+                                    }
+                                    $recent_opponents = array_slice($recent_opponents, 0, 4);
+                                @endphp
+
+                                @forelse ($recent_opponents as $opponent_id)
+                                    @php
+                                        $user_info = get_userdata($opponent_id);
+                                        $opponent_name = $user_info ? $user_info->display_name : 'Desconocido';
+                                        $avatar = $user_info ? get_avatar($opponent_id, 64) : null;
+                                    @endphp
+                                    <div class="text-center">
+                                        <div class="mx-auto flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-gray-700 md:h-16 md:w-16">
+                                            @if ($avatar)
+                                                {!! $avatar !!} {{-- Aquí imprimimos directamente el HTML que genera get_avatar --}}
+                                            @else
+                                                <i class="fas fa-user text-gray-400"></i>
+                                            @endif
+                                        </div>
+                                        <p class="mt-1 text-xs">{{ esc_html($opponent_name) }}</p>
                                     </div>
-                                    <p class="mt-1 text-xs">Sin datos</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 md:h-16 md:w-16">
-                                        <i class="fas fa-question text-gray-400"></i>
-                                    </div>
-                                    <p class="mt-1 text-xs">Sin datos</p>
-                                </div>
-                                <div class="text-center">
-                                    <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 md:h-16 md:w-16">
-                                        <i class="fas fa-question text-gray-400"></i>
-                                    </div>
-                                    <p class="mt-1 text-xs">Sin datos</p>
-                                </div>
+                                @empty
+                                    @for ($i = 0; $i < 6; $i++)
+                                        <div class="text-center">
+                                            <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 md:h-16 md:w-16">
+                                                <i class="fas fa-question text-gray-400"></i>
+                                            </div>
+                                            <p class="mt-1 text-xs">Sin datos</p>
+                                        </div>
+                                    @endfor
+                                @endforelse
+
                             </div>
                         </div>
+
                     </div>
 
                     <!-- Leaderboard Geek -->
+                    @php
+                        global $wpdb;
+
+                        // Tabla de matches (ajusta si tu prefijo no es wp_)
+                        $matches_table = $wpdb->prefix . 'tm_matches';
+
+                        // Obtener lista de jugadores
+                        $players = get_users([
+                            'role__in' => ['subscriber', 'participant', 'player'], // ajusta roles si usas otros
+                        ]);
+
+                        $leaderboard = [];
+
+                        foreach ($players as $player) {
+                            $user_id = $player->ID;
+
+                            // Partidos ganados
+                            $wins = $wpdb->get_var(
+                                $wpdb->prepare(
+                                    "
+                                        SELECT COUNT(*) 
+                                        FROM $matches_table
+                                        WHERE winner_id = %d
+                                    ",
+                                    $user_id,
+                                ),
+                            );
+
+                            // Partidos jugados totales
+                            $played = $wpdb->get_var(
+                                $wpdb->prepare(
+                                    "
+                                        SELECT COUNT(*) 
+                                        FROM $matches_table
+                                        WHERE one_competitor_id = %d OR two_competitor_id = %d
+                                    ",
+                                    $user_id,
+                                    $user_id,
+                                ),
+                            );
+
+                            $losses = max(0, $played - $wins);
+
+                            $leaderboard[] = [
+                                'id' => $user_id,
+                                'name' => $player->display_name,
+                                'wins' => $wins,
+                                'losses' => $losses,
+                                'played' => $played,
+                                'avatar' => get_avatar($user_id, 40, '', '', ['class' => 'w-10 h-10 rounded-full']),
+                            ];
+                        }
+
+                        // Ordenar por más victorias
+                        usort($leaderboard, function ($a, $b) {
+                            return $b['wins'] <=> $a['wins'];
+                        });
+                    @endphp
+
                     <div class="card p-6">
                         <h3 class="mb-4 flex items-center gap-2 text-xl font-bold">
                             <i class="fas fa-trophy text-yellow-500"></i> Leaderboard Geek
@@ -434,44 +726,97 @@ echo ' -->';
                         </div>
 
                         <div class="mt-6 text-center">
-                            <button class="rounded-lg bg-purple-700 px-4 py-2 text-sm transition hover:bg-purple-600">
+                            <button class="rounded-lg bg-orange-700 px-4 py-2 text-sm transition hover:bg-orange-600">
                                 Ver ranking completo
                             </button>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Columna derecha: TCG's y Colecciones -->
                 <div class="w-full space-y-8 lg:w-1/2">
-                    @php
-                        $tcgs = [
-                            [
-                                'img' => 'One Piece.png',
-                                'name' => 'One Piece',
-                                'style' => 'background-image: linear-gradient(to bottom right, rgba(22, 78, 99, 0.5), rgba(56, 189, 248, 0.3));',
-                            ],
-                            [
-                                'img' => 'Magic The Gathering.png',
-                                'name' => 'Magic',
-                                'style' => 'background-image: linear-gradient(to bottom right, rgba(127, 29, 29, 0.5), rgba(185, 28, 28, 0.3));',
-                            ],
-                            [
-                                'img' => 'Pokémon.png',
-                                'name' => 'POKÉMON',
-                                'style' => 'background-image: linear-gradient(to bottom right, rgba(113, 63, 18, 0.5), rgba(202, 138, 4, 0.3));',
-                            ],
-                            [
-                                'img' => 'Yu-Gi-Oh!.png',
-                                'name' => 'Yu-Gi-Oh!',
-                                'style' => 'background-image: linear-gradient(to bottom right, rgba(30, 64, 175, 0.5), rgba(37, 99, 235, 0.3));',
-                            ],
-                            [
-                                'img' => 'Lorcana.png',
-                                'name' => 'Lorcana',
-                                'style' => 'background-image: linear-gradient(to bottom right, rgba(88, 28, 135, 0.5), rgba(147, 51, 234, 0.2));',
-                            ],
-                        ];
 
+                    {{-- ========================= --}}
+                    {{-- SECCIÓN TCGs DEL USUARIO --}}
+                    {{-- ========================= --}}
+                    @php
+                        $customer_id = get_current_user_id();
+                        $tcgs = [];
+
+                        if ($customer_id) {
+                            // Obtiene pedidos del usuario
+                            $orders = wc_get_orders([
+                                'customer_id' => $customer_id,
+                                'status' => ['completed', 'processing'],
+                                'limit' => -1,
+                            ]);
+
+                            foreach ($orders as $order) {
+                                foreach ($order->get_items() as $item) {
+                                    $product = $item->get_product();
+
+                                    if ($product) {
+                                        foreach ($product->get_category_ids() as $cat_id) {
+                                            $cat = get_term($cat_id, 'product_cat');
+
+                                            // Lista de TCG principales (ajústala según tus necesidades)
+                                            $tcgPrincipales = [
+                                                'one piece',
+                                                'magic the gathering',
+                                                'pokemon',
+                                                'yu-gi-oh',
+                                                'lorcana',
+                                                'digimon',
+                                                'dragon ball',
+                                                'flesh and blood',
+                                                'star wars',
+                                            ];
+
+                                            if (in_array(strtolower($cat->name), $tcgPrincipales)) {
+                                                // Inicializar si no existe
+                                                if (!isset($tcgs[$cat->term_id])) {
+                                                    $thumbnail_id = get_term_meta($cat->term_id, 'thumbnail_id', true);
+                                                    $image_url = $thumbnail_id ? wp_get_attachment_url($thumbnail_id) : asset('resources/images/tcg/no-image.png');
+
+                                                    $tcgs[$cat->term_id] = [
+                                                        'img' => $image_url,
+                                                        'name' => $cat->name,
+                                                        'style' => 'background-image: linear-gradient(to bottom right, rgba(22, 78, 99, 0.5), rgba(56, 189, 248, 0.3));',
+                                                        'count' => 0,
+                                                    ];
+                                                }
+
+                                                // Sumar cantidad
+                                                $tcgs[$cat->term_id]['count'] += $item->get_quantity();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    @endphp
+
+                    <div class="card p-6">
+                        <h3 class="mb-4 flex items-center gap-2 text-xl font-bold">
+                            <i class="fas fa-dice-d20 text-blue-400"></i> TCG’s
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                            @forelse ($tcgs as $tcg)
+                                <div style="{{ $tcg['style'] }}" class="tcg-item flex flex-col items-center justify-center rounded-xl p-4 text-center">
+                                    <div>
+                                        <img class="h-10 w-10 object-contain sm:h-14 sm:w-14" src="{{ $tcg['img'] }}" alt="{{ $tcg['name'] }}">
+                                    </div>
+                                    <div class="text-sm">{{ $tcg['name'] }}</div>
+                                    <div class="text-xs text-gray-400">{{ $tcg['count'] }} pedidos</div>
+                                </div>
+                            @empty
+                                <p class="text-sm text-gray-400">No tienes cartas registradas aún.</p>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    @php
                         $colleciones = [
                             ['img' => 'DC.png', 'name' => 'DC', 'items' => '0'],
                             ['img' => 'Disney.png', 'name' => 'Disney', 'items' => '0'],
@@ -481,33 +826,6 @@ echo ' -->';
                             ['img' => 'Pixar.png', 'name' => 'Pixar', 'items' => '0'],
                         ];
                     @endphp
-
-                    <!-- Mis TCG's -->
-                    <div class="card tcg-accent p-6">
-                        <h3 class="mb-4 flex items-center gap-2 text-xl font-bold">
-                            <i class="fas fa-dragon text-cyan-400"></i> Mis TCG's
-                        </h3>
-                        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                            @foreach ($tcgs as $tcg)
-                                <div style="{{ $tcg['style'] }}" class="tcg-item flex flex-col items-center justify-center rounded-xl p-4 text-center">
-                                    <div>
-                                        <img class="h-10 w-10 object-contain sm:h-14 sm:w-14" src="{{ asset('resources/images/tcg/' . $tcg['img']) }}"
-                                            alt="{{ $tcg['name'] }}">
-                                    </div>
-                                    <div class="text-sm">
-                                        {{ $tcg['name'] }}
-                                    </div>
-                                    <div class="text-xs text-gray-400">
-                                        0 cartas
-                                    </div>
-                                </div>
-                            @endforeach
-                            <div
-                                class="tcg-item flex cursor-pointer items-center justify-center rounded-xl bg-gradient-to-br from-gray-800 to-gray-700 p-4 text-center hover:bg-gray-700">
-                                <i class="fas fa-plus text-3xl text-gray-400"></i>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Colecciones -->
                     <div class="card p-6">
@@ -526,7 +844,114 @@ echo ' -->';
                         </div>
                     </div>
 
-                    <!-- Sobre mí -->
+                    {{-- ========================= --}}
+                    {{-- SECCIÓN COLECCIONES
+
+                        @php
+                            $colecciones = [];
+
+                            // Categorías principales (colecciones)
+                            $categories = get_terms([
+                                'taxonomy'   => 'product_cat',
+                                'hide_empty' => true,
+                                'parent'     => 0,
+                            ]);
+
+                            foreach ($categories as $cat) {
+                                $imgFile = $cat->slug . '.png';
+                                $fullPath = get_stylesheet_directory() . '/resources/images/colecciones/' . $imgFile;
+                                $imgUrl = file_exists($fullPath)
+                                    ? asset('resources/images/colecciones/' . $imgFile)
+                                    : asset('resources/images/colecciones/no-image.png');
+
+                                $colecciones[] = [
+                                    'img'   => $imgUrl,
+                                    'name'  => $cat->name,
+                                    'items' => $cat->count,
+                                ];
+                            }
+                        @endphp
+
+                        <div class="card p-6">
+                            <h3 class="mb-4 flex items-center gap-2 text-xl font-bold">
+                                <i class="fas fa-layer-group text-green-400"></i> Colecciones
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                                @foreach ($colecciones as $coleccion)
+                                    <div class="collection-item flex flex-col items-center justify-center rounded-xl p-4 text-center">
+                                        <img class="h-10 w-10 object-contain sm:h-14 sm:w-14"
+                                            src="{{ $coleccion['img'] }}"
+                                            alt="{{ $coleccion['name'] }}">
+                                        <div class="text-sm">{{ $coleccion['name'] }}</div>
+                                        <div class="text-xs text-gray-400">{{ $coleccion['items'] }} items</div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                    </div>
+ ========================= --}}
+
+                    <!-- Trofeos -->
+
+                    <div class="card p-6">
+                        <h3 class="mb-4 flex items-center gap-2 text-xl font-bold">
+                            <i class="fa-solid fa-medal text-orange-500"></i> Achievements
+                        </h3>
+                        @php
+                            $user_id = get_current_user_id();
+
+                            $achievements = gamipress_get_user_achievements([
+                                'user_id' => $user_id,
+                            ]);
+
+                        @endphp
+                        @if (!empty($achievements))
+                            <div class="swiper swiper-container mt-10 w-full">
+                                <div class="swiper-wrapper text-white">
+                                    @if (do_shortcode('[gamipress_last_achievements_earned type="winners"]'))
+                                        <div class="swiper-slide">
+                                            {!! do_shortcode('[gamipress_last_achievements_earned type="winners" steps="no" toggle="no" link="no" exerpt="no" limit="1" columns="1"]') !!}
+                                        </div>
+                                    @endif
+                                    @if (do_shortcode('[gamipress_last_achievements_earned type="stream"]'))
+                                        <div class="swiper-slide">
+                                            {!! do_shortcode('[gamipress_last_achievements_earned type="stream" steps="no" toggle="no" link="no" exerpt="no" limit="1" columns="1"]') !!}
+                                        </div>
+                                    @endif
+                                    @if (do_shortcode('[gamipress_last_achievements_earned type="memberships"]'))
+                                        <div class="swiper-slide">
+                                            {!! do_shortcode('[gamipress_last_achievements_earned type="memberships" steps="no" toggle="no" link="no" exerpt="no" limit="1" columns="1"]') !!}
+                                        </div>
+                                    @endif
+                                    @if (do_shortcode('[gamipress_last_achievements_earned type="limited"]'))
+                                        <div class="swiper-slide">
+                                            {!! do_shortcode('[gamipress_last_achievements_earned type="limited" steps="no" toggle="no" link="no" exerpt="no" limit="1" columns="1"]') !!}
+                                        </div>
+                                    @endif
+                                    @if (do_shortcode('[gamipress_last_achievements_earned type="orders"]'))
+                                        <div class="swiper-slide">
+                                            {!! do_shortcode('[gamipress_last_achievements_earned type="orders" steps="no" toggle="no" link="no" exerpt="no" limit="1" columns="1"]') !!}
+                                        </div>
+                                    @endif
+                                    @if (do_shortcode('[gamipress_last_achievements_earned type="referral"]'))
+                                        <div class="swiper-slide">
+                                            {!! do_shortcode('[gamipress_last_achievements_earned type="referral" steps="no" toggle="no" link="no" exerpt="no" limit="1" columns="1"]') !!}
+                                        </div>
+                                    @endif
+                                    @if (do_shortcode('[gamipress_last_achievements_earned type="unique"]'))
+                                        <div class="swiper-slide">
+                                            {!! do_shortcode('[gamipress_last_achievements_earned type="unique" steps="no" toggle="no" link="no" exerpt="no" limit="1" columns="1"]') !!}
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @else
+                            <div>Aun no haz debloqueado ningun achievement.</div>
+                        @endif
+
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -534,7 +959,7 @@ echo ' -->';
         <script>
             // Efecto de hover mejorado para los items
             document.addEventListener('DOMContentLoaded', function() {
-                const items = document.querySelectorAll('.tcg-item, .collection-item');
+                const items = document.querySelectorAll('.tcg-item, .collection-item, .stat-item');
                 items.forEach(item => {
                     item.addEventListener('mouseenter', function() {
                         this.style.transform = 'translateY(-5px)';
@@ -546,5 +971,27 @@ echo ' -->';
             });
         </script>
     </body>
+
+    <!-- Swiper script -->
+    <script type="module">
+        import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs';
+
+        new Swiper('.swiper-container', {
+            grabCursor: false,
+            centeredSlides: true,
+            slidesPerView: 1,
+            loop: true,
+            autoplay: {
+                delay: 2500,
+                pauseOnMouseEnter: true
+            },
+            breakpoints: {
+                640: {
+                    slidesPerView: 3
+                }
+            }
+
+        });
+    </script>
 
 </html>

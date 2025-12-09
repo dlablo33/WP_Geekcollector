@@ -57,7 +57,7 @@
     <div class="p-5">
         <div class="mb-3 flex items-start justify-between">
             <h3 class="text-lg font-bold text-white transition-colors hover:text-orange-400">
-                <a href="{{ get_permalink() }}">{{ get_the_title() }}</a>
+                <a href="{{ get_permalink() }}">{!! get_the_title() !!}</a>
             </h3>
             <!-- Rating -->
             <div class="flex items-center rounded-full bg-gray-800 px-2 py-1">
@@ -84,15 +84,427 @@
                 @endif
             </div>
 
-            <button
-                class="add-to-cart flex transform items-center rounded-full bg-gradient-to-r from-orange-600 to-orange-500 px-4 py-2 text-sm font-bold text-white shadow transition-all duration-300 hover:scale-105 hover:from-orange-500 hover:to-orange-600 hover:shadow-lg hover:shadow-orange-500/20"
-                data-product_id="<?php echo get_the_ID(); ?>" data-product_sku="<?php echo esc_attr(wc_get_product(get_the_ID())->get_sku()); ?>">
-                <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                Añadir
-            </button>
+<button
+    class="add-to-cart flex transform items-center rounded-full bg-gradient-to-r from-orange-600 to-orange-500 px-4 py-2 text-sm font-bold text-white shadow transition-all duration-300 hover:scale-105 hover:from-orange-500 hover:to-orange-600 hover:shadow-lg hover:shadow-orange-500/20"
+    data-product_id="<?php echo get_the_ID(); ?>" 
+    data-product_sku="<?php echo esc_attr(wc_get_product(get_the_ID())->get_sku()); ?>">
+    <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+    </svg>
+    Añadir
+</button>
+
         </div>
     </div>
 </li>
+
+<style>
+        .animated-gradient {
+            background: linear-gradient(-45deg,
+                    rgba(254, 240, 138, 0.7),
+                    rgba(234, 88, 12, 0.7),
+                    rgba(220, 38, 38, 0.7),
+                    rgba(234, 88, 12, 0.7));
+            background-size: 400% 400%;
+            animation: gradientMove 18s ease-in-out infinite alternate,
+                pulseLight 6s ease-in-out infinite;
+        }
+
+        @keyframes gradientMove {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            25% {
+                background-position: 50% 100%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            75% {
+                background-position: 50% 0%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes pulseLight {
+
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+
+            50% {
+                filter: brightness(1.15);
+            }
+        }
+
+        /* Animaciones personalizadas */
+        @keyframes fade-in-down {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fade-in-up {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slide-in-left {
+            0% {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes bounce-in {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse-slow {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes pulse-fast {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-fade-in-down {
+            animation: fade-in-down 0.8s ease-out forwards;
+        }
+
+        .animate-fade-in-up {
+            animation: fade-in-up 0.8s ease-out forwards;
+        }
+
+        .animate-slide-in-left {
+            animation: slide-in-left 0.6s ease-out forwards;
+        }
+
+        .animate-bounce-in {
+            animation: bounce-in 0.8s ease-out forwards;
+        }
+
+        .animate-pulse-slow {
+            animation: pulse-slow 3s ease-in-out infinite;
+        }
+
+        .animate-pulse-fast {
+            animation: pulse-fast 1s ease-in-out infinite;
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Estilos para el acordeón de categorías */
+        .accordion-categories li.has-children.active .subcategories {
+            display: block;
+            max-height: 1000px;
+        }
+
+        /* Estilos para el filtro de precios */
+        .price-filter-wrapper .ui-slider {
+            height: 6px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .price-filter-wrapper .ui-slider .ui-slider-range {
+            background-color: #f97316 !important;
+            height: 6px !important;
+        }
+
+        .price-filter-wrapper .ui-slider .ui-slider-handle {
+            width: 18px !important;
+            height: 18px !important;
+            background: #f97316 !important;
+            border-radius: 50% !important;
+            border: none !important;
+            top: -6px !important;
+            margin-left: -9px !important;
+            cursor: pointer !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .price-filter-wrapper .price_slider_amount button {
+            background: #f97316 !important;
+            color: white !important;
+            border: none !important;
+            padding: 10px 20px !important;
+            border-radius: 9999px !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            font-size: 12px !important;
+            letter-spacing: 0.5px !important;
+            transition: all 0.3s ease !important;
+            width: 100% !important;
+        }
+
+        .price-filter-wrapper .price_slider_amount button:hover {
+            background: #ea580c !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 8px rgba(249, 115, 22, 0.3) !important;
+        }
+
+        .price-filter-wrapper .price_label {
+            color: #f97316 !important;
+            font-size: 14px !important;
+            font-weight: bold !important;
+            text-align: center !important;
+            margin-bottom: 15px !important;
+        }
+
+        /* Estilos para las cards de productos */
+        .product-card {
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .product-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(249, 115, 22, 0.1), 0 10px 10px -5px rgba(249, 115, 22, 0.04);
+        }
+
+        /* Paginación */
+        .page-numbers {
+            display: flex;
+            gap: 8px;
+            align-items: center,
+        }
+
+        .page-numbers li {
+            display: flex;
+        }
+
+        .page-numbers a,
+        .dots,
+        .current {
+            padding: 6px 12px;
+            border-radius: 9999px;
+            border-style: solid;
+            border-color: white;
+            transition: all 0.3s ease;
+            background-color: #1E2939;
+            color: #f97316;
+        }
+
+        .page-numbers a:hover {
+            background: #f97316 !important;
+            color: white !important;
+            border-radius: 9999px;
+        }
+
+        .page-numbers .current {
+            background: #f97316;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Mejoras generales */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Custom Style noUiSlider */
+        /* Barra Slider */
+        .noUi-connect {
+            background: linear-gradient(to right, #ea580c, #f97316) !important;
+        }
+
+        /* Botones Arrastrables */
+        .noUi-handle {
+            background: linear-gradient(to bottom, #ea580c, #f97316) !important;
+            border: 2px solid #fff !important;
+            box-shadow: 0 2px 6px rgba(234, 88, 12, 0.4) !important;
+        }
+
+        .noUi-handle:before,
+        .noUi-handle:after {
+            background: rgba(255, 255, 255, 0.3) !important;
+        }
+
+        .noUi-target {
+            background: #374151 !important;
+            border: none !important;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .noUi-handle:hover {
+            background: linear-gradient(to bottom, #dc2626, #ea580c) !important;
+            cursor: grab;
+        }
+
+        .noUi-handle:active {
+            cursor: grabbing;
+        }
+    </style>
+
+    <!-- Scripts para interactividad -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Acordeón de categorías
+            const categoryToggles = document.querySelectorAll('.category-toggle');
+
+            categoryToggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    const parentLi = this.closest('li');
+                    const submenu = parentLi.querySelector('.subcategories');
+
+                    // Cerrar otros items abiertos
+                    document.querySelectorAll('.accordion-categories li.has-children.active').forEach(item => {
+                        if (item !== parentLi) {
+                            item.classList.remove('active');
+                            item.querySelector('.subcategories').style.maxHeight = '0';
+                        }
+                    });
+
+                    // Alternar el item actual
+                    parentLi.classList.toggle('active');
+
+                    if (parentLi.classList.contains('active')) {
+                        submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                    } else {
+                        submenu.style.maxHeight = '0';
+                    }
+                });
+            });
+
+            // 2. Botones "Añadir al carrito" con recarga de página
+            const addToCartButtons = document.querySelectorAll('.add-to-cart');
+            addToCartButtons.forEach(button => {
+                // Efecto hover con animación
+                button.addEventListener('mouseenter', function() {
+                    this.querySelector('svg').classList.add('animate-spin');
+                });
+
+                button.addEventListener('mouseleave', function() {
+                    this.querySelector('svg').classList.remove('animate-spin');
+                });
+
+                // Click para añadir al carrito
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const productId = this.getAttribute('data-product_id');
+                    const originalText = this.innerHTML;
+
+                    // Mostrar estado de carga
+                    this.innerHTML =
+                        '<svg class="animate-spin w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Añadiendo...';
+                    this.disabled = true;
+
+                    // AJAX para añadir al carrito
+                    jQuery.ajax({
+                        type: 'POST',
+                        url: wc_add_to_cart_params.ajax_url,
+                        data: {
+                            action: 'woocommerce_add_to_cart',
+                            product_id: productId,
+                            quantity: 1
+                        },
+                        success: function(response) {
+                            // Si es producto variable, redirigir a la página del producto
+                            if (response.error && response.product_url) {
+                                window.location.href = response.product_url;
+                                return;
+                            }
+
+                            // Recargar la página para actualizar el carrito
+                            window.location.reload();
+                        },
+                        error: function() {
+                            // Mostrar error y restaurar botón
+                            button.innerHTML = 'Error! Intenta nuevamente';
+                            setTimeout(() => {
+                                button.innerHTML = originalText;
+                                button.disabled = false;
+                            }, 2000);
+                        }
+                    });
+                });
+            });
+
+            // 3. Estilizar el slider de precios
+            const waitForPriceSlider = setInterval(() => {
+                const priceSlider = document.querySelector('.price_slider');
+                if (priceSlider) {
+                    clearInterval(waitForPriceSlider);
+
+                    // Aplicar estilo naranja a los controles
+                    const sliderHandles = document.querySelectorAll('.ui-slider-handle');
+                    sliderHandles.forEach(handle => {
+                        handle.style.backgroundColor = '#f97316';
+                        handle.style.borderColor = '#f97316';
+                    });
+
+                    const sliderRange = document.querySelector('.ui-slider-range');
+                    if (sliderRange) {
+                        sliderRange.style.backgroundColor = '#f97316';
+                    }
+                }
+            }, 100);
+        });
+    </script>

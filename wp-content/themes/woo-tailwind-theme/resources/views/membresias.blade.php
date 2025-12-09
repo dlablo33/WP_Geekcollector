@@ -129,7 +129,7 @@
                         'Apartado' => 'Máx. 2 Cajas',
                         'Stream Area' => 'SI',
                         'Grading Mensual' => '$500 MXN',
-                        'Credito' => '$1,500',
+                        'Credito' => '$1,500 MXN',
                         'Descuento' => '5%',
                         'Mostrar Coleccion' => 'NO',
                     ],
@@ -139,8 +139,8 @@
                         'Subasta Comision' => '8 ARTÍCULOS',
                         'Apartado' => 'Máx. 4 Cajas',
                         'Stream Area' => 'SI',
-                        'Grading Mensual' => '$1,000',
-                        'Credito' => '$3,000',
+                        'Grading Mensual' => '$1,000 MXN',
+                        'Credito' => '$3,000 MXN',
                         'Descuento' => '10%',
                         'Mostrar Coleccion' => 'SI',
                     ],
@@ -461,7 +461,7 @@
                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="m9 6 6 6-6 6"></path>
                         </svg>
-                        ¿Puedo transferir mir créditos a otro miembro?
+                        ¿Puedo transferir mis créditos a otro miembro?
                     </button>
                     <div id="pregunta-r3-heading" class="hs-collapse hidden w-full overflow-hidden uppercase transition-[height] duration-300"
                         aria-labelledby="pregunta-r3">
